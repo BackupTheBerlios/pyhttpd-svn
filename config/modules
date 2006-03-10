@@ -1,0 +1,13 @@
+# list of modules to import
+
+alias
+dirindex
+webadmin
+phpcgi
+
+#htaccess
+#php
+#python
+#rewrite
+#log
+#mysqllog
