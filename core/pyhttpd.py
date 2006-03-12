@@ -5,7 +5,7 @@
 ##################################################################
 
 from baseConfig import pConfig
-from myBaseHTTPServer import HTTPServer
+from baseHTTPServer import HTTPServer
 from baseRequestHandler import pHTTPRequestHandler
 from baseModules import pModules
 

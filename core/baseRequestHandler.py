@@ -1,18 +1,18 @@
 ##################################################################
-#	PyWeb
+#	pyHTTPd
 #	$Id$
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
 import os
-import myBaseHTTPServer
-import mimetypes
+from baseHTTPServer import BaseHTTPRequestHandler
+from mimetypes import MimeTypes
 
 from baseConfig import pConfig
 import baseHeaders
 import baseRoutines
 
-class pHTTPRequestHandler(myBaseHTTPServer.BaseHTTPRequestHandler):
+class pHTTPRequestHandler(BaseHTTPRequestHandler):
 	cookies = {}
 	postdata = {}
 	
@@ -66,7 +66,7 @@ class pHTTPRequestHandler(myBaseHTTPServer.BaseHTTPRequestHandler):
 		fd.close()
 		self.send_response(200)
 		
-		mime = mimetypes.MimeTypes()
+		mime = MimeTypes()
 		mimetype = mime.guess_type(filename)
 		self.send_header("Content-Type", mimetype[0])
 		if mimetype[1]:
