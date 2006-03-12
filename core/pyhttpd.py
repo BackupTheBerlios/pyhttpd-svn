@@ -4,8 +4,6 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-#sys.path = ["/mnt/crypted/python/pyWeb/"]+sys.path
-
 from baseConfig import pConfig
 from myBaseHTTPServer import HTTPServer
 from baseRequestHandler import pHTTPRequestHandler
