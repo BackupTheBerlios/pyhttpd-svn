@@ -4,9 +4,9 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-import sys,inspect
+import os,sys,inspect
 
-sys.path = ["/mnt/crypted/python/pyWeb/modules/"]+sys.path
+sys.path = [os.getcwd()+"/modules/"]+sys.path
 
 class pModules:
 	configfile = ""
