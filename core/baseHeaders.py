@@ -4,6 +4,7 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
+'''
 def parseHeaders(httpd):
 	parseCookies(httpd)
 	
@@ -17,15 +18,19 @@ def parseCookies(httpd):
 
 def parsePOSTData(httpd):
 	clen = httpd.headers.getheader("content-length")
+	httpd.posttype = httpd.headers.getheader("content-type")
 	if clen:
-		data = httpd.rfile.read(int(clen))
-		parseValues(httpd, data)
+		httpd.postdata = httpd.rfile.read(int(clen))
 
 def parseGETData(httpd, data):
 	parseValues(httpd, data)
 
-def parseValues(httpd, data):
+def parseValues(data):
+	postdata = {}
 	fields = data.split("&")
 	for field in fields:
+		print field
 		name, value = field.split("=")
-		httpd.postdata[name] = value
+		postdata[name] = value
+	return postdata
+'''

@@ -12,6 +12,12 @@ class phpcgi:
 		return
 	
 	def before_GET(self, httpd):
+		self.processFile(httpd)
+		
+	def before_POST(self, httpd):
+		self.processFile(httpd)
+		
+	def processFile(self, httpd):
 		if httpd.path.endswith(".php"):
 			self.parseFile(httpd)
 			
@@ -39,9 +45,14 @@ class phpcgi:
 		env["AUTH_TYPE"]		= ""
 		env["REMOTE_IDENT"] 	= ""
 		env["REMOTE_USER"]		= ""
-		
-		env["CONTENT_LENGTH"]	= ""
-		env["CONTENT_TYPE"]		= ""
+
+		length = httpd.headers.getheader("content-length")
+		if length:
+			env["CONTENT_LENGTH"]	= length
+			env["CONTENT_TYPE"]		= httpd.headers.getheader("content-type")
+		else:
+			env["CONTENT_LENGTH"]	= ""
+			env["CONTENT_TYPE"]		= ""
 		
 		#env["REQUEST_TIME"]	= ""
 		#env["REMOTE_PORT"]		= ""
@@ -55,14 +66,16 @@ class phpcgi:
 		
 		# collect the headers additionally sent by the user
 		for key in httpd.headers.keys():
-			env["HTTP_"+key.upper().replace("-","_")] = httpd.headers.getheader(key)
+			newkey = key.upper().replace("-","_")
+			if not env.has_key(newkey):
+				env["HTTP_"+newkey] = httpd.headers.getheader(key)
 		
 		os.environ.update(env)
 		httpd.send_response(200, "Script output follows")
 		
-		# fork and pipe our cgi data
 		httpd.wfile.flush()
 		
+		# fork and pipe our cgi data
 		pid = os.fork()
 		if pid:
 			# main process
@@ -71,5 +84,4 @@ class phpcgi:
 			# child process
 			os.dup2(httpd.rfile.fileno(), 0)
 			os.dup2(httpd.wfile.fileno(), 1)
-			os.execve("/usr/bin/php-cgi", ["php-cgi", httpd.path], os.environ)
-			return
+			os.execve("/usr/bin/php-cgi", ["php-cgi"], os.environ)

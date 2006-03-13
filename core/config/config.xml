@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
-	<software>pyWeb/0.1alpha1</software>
+	<software>pyHTTPd/0.0.1-alpha</software>
 	<host>localhost</host>
 	<port>8888</port>
 	<docroot>/home/tim/wwwtest</docroot>

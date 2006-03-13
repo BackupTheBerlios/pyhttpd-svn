@@ -13,21 +13,29 @@ import baseHeaders
 import baseRoutines
 
 class pHTTPRequestHandler(BaseHTTPRequestHandler):
-	cookies = {}
-	postdata = {}
+#	cookies = {}
+#	postdata = ""
+
+	# Make rfile unbuffered -- we need to read one line and then pass
+	# the rest to a subprocess, so we can't use buffered input.
+	rbufsize = 0
 	
 	def do_GET(self):
+		self.handleCommand()
+	
+	def do_POST(self):
+#		baseHeaders.parsePOSTData(self)
+		self.handleCommand()
+
+	def handleCommand(self):
 		self.handleFileFlag = True
 		
 		baseRoutines.parsePaths(self)
-		baseHeaders.parseHeaders(self)
-		self.modules.hook(self, "before_GET")
-
-		'''if self.path.find("?") > -1:
-			name, data = self.path.split("?")
-			self.path = name
-			baseHeaders.parseGETData(self, data)'''
+		#baseHeaders.parseHeaders(self)
 		
+		# trigger the "before" hook
+		self.modules.hook(self, "before_"+self.command)
+
 		if not os.path.isfile(self.path):
 			if os.path.isfile(pConfig.getAttr("docroot")+self.path):
 				self.path = pConfig.getAttr("docroot")+self.path
@@ -41,24 +49,8 @@ class pHTTPRequestHandler(BaseHTTPRequestHandler):
 		if self.handleFileFlag:
 			self.handleFile(self.path)
 		
-		self.modules.hook(self, "after_GET")
-	
-	def do_POST(self):
-		baseHeaders.parseHeaders(self)
-		baseHeaders.parsePOSTData(self)
-		if not self.modules.hook(self, "before_POST"):
-			return
-		
-		if self.path.endswith("/"):
-			dirIndex = pDirIndex()
-			filename = dirIndex.findIndexFile(pConfig.getAttr("docroot")+self.path);
-		else:
-			filename = pConfig.getAttr("docroot")+self.path
-		
-		self.handleFile(filename)
-		
-		if not self.modules.hook(self, "after_POST"):
-			return
+		# trigger the "after" hook
+		self.modules.hook(self, "after_"+self.command)
 
 	def handleFile(self, filename):
 		fd = open(filename)
