@@ -13,12 +13,18 @@ import baseHeaders
 import baseRoutines
 
 class pHTTPRequestHandler(BaseHTTPRequestHandler):
-#	cookies = {}
-#	postdata = ""
+	#cookies = {}
+	#postdata = ""
 
 	# Make rfile unbuffered -- we need to read one line and then pass
 	# the rest to a subprocess, so we can't use buffered input.
 	rbufsize = 0
+	
+	def do_HEAD(self):
+		print "HEAD cmd used"
+	
+	def do_PUT(self):
+		print "PUT cmd used"
 	
 	def do_GET(self):
 		self.handleCommand()
@@ -47,7 +53,10 @@ class pHTTPRequestHandler(BaseHTTPRequestHandler):
 				self.handleFileFlag = False
 		
 		if self.handleFileFlag:
-			self.handleFile(self.path)
+			try:
+				self.handleFile(self.path)
+			except:
+				pass
 		
 		# trigger the "after" hook
 		self.modules.hook(self, "after_"+self.command)
@@ -56,6 +65,7 @@ class pHTTPRequestHandler(BaseHTTPRequestHandler):
 		fd = open(filename)
 		content = fd.read()
 		fd.close()
+		
 		self.send_response(200)
 		
 		mime = MimeTypes()

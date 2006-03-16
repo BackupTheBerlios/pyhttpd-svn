@@ -4,7 +4,7 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-import os
+import os,select,socket,sys
 from baseConfig import pConfig
 
 class phpcgi:
@@ -71,17 +71,56 @@ class phpcgi:
 				env["HTTP_"+newkey] = httpd.headers.getheader(key)
 		
 		os.environ.update(env)
-		httpd.send_response(200, "Script output follows")
 		
 		httpd.wfile.flush()
-		
+
 		# fork and pipe our cgi data
+		r, w = os.pipe()
+		
 		pid = os.fork()
 		if pid:
 			# main process
+			# read the pipe
+			os.close(w)
+			r = os.fdopen(r)
+			output = r.read()
+			
 			pid, sts = os.waitpid(pid, 0)
 		else:
 			# child process
-			os.dup2(httpd.rfile.fileno(), 0)
-			os.dup2(httpd.wfile.fileno(), 1)
+			#os.dup2(httpd.rfile.fileno(), 0)
+			#os.dup2(httpd.wfile.fileno(), 1)
+			#os.execve("/usr/bin/php-cgi", ["php-cgi"], os.environ)
+			
+			# if there is client data then pipe it
+			if length:
+				os.dup2(httpd.rfile.fileno(), 0)
+			
+			# create the pipes
+			os.close(r)
+			w = os.fdopen(w, "w")
+			os.dup2(w.fileno(), 1)
 			os.execve("/usr/bin/php-cgi", ["php-cgi"], os.environ)
+		
+		# if there is client data then throw away additional data
+		if length:
+			while select.select([httpd.rfile], [], [], 0)[0]:
+				if not httpd.rfile.read(1):
+					break
+		
+		# process the php output
+		status = ""
+		for line in output.split("\n"):
+			if line == "":
+				break
+			if line.startswith("Status: "):
+				status = line.split(" ")[1]
+				break
+		
+		# sent data to the browser
+		if status:
+			httpd.send_response(int(status))
+		else:
+			httpd.send_response(200, "Script output follows")
+		httpd.wfile.write(output)
+		httpd.wfile.flush()
