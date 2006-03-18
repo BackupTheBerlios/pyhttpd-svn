@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ##################################################################
 #	PyWeb
 #	$Id$
@@ -14,7 +16,7 @@ if __name__ == "__main__":
 	pConfig.loadConfiguration()
 	
 	# start main server thread
-	httpd = HTTPServer(('',int(pConfig.getAttr("port"))), pHTTPRequestHandler)
+	httpd = HTTPServer(('',int(pConfig.getValue("base.port"))), pHTTPRequestHandler)
 	
 	# load modules
 	pHTTPRequestHandler.modules = pModules()

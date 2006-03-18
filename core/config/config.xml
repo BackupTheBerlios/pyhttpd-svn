@@ -1,18 +1,18 @@
-<!--
-##################################################################
-#	pyHTTPd
-#	$Id$
-#	(c) 2006 by Tim Taubert
-##################################################################
--->
-
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	##################################################################
+	#	pyHTTPd
+	#	$Id$
+	#	(c) 2006 by Tim Taubert
+	##################################################################
+-->
 <config>
 	<base>
 		<software>pyHTTPd/0.0.1</software>
 		<host>localhost</host>
 		<port>8888</port>
 		<docroot>/home/tim/wwwtest</docroot>
+		<servroot>/mnt/crypted/python/pyhttpd</servroot>
 		<admin>admin@server.com</admin>
 		<modules>
 			<module>alias</module>

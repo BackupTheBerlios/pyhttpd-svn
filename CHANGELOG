@@ -1,6 +1,11 @@
 pyHTTPd CHANGELOG
 ===================================
 
+pyHTTPd 0.0.2
+-----------------------------------
+	+ configuration interface re-designed (xml)
+	+ module configuration has now a handler
+
 pyHTTPd 0.0.1 (16.03.2006)
 -----------------------------------
 	+ initial revision

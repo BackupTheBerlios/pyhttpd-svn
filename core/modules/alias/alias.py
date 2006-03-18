@@ -1,24 +1,20 @@
+# -*- coding: utf-8 -*-
+
 ##################################################################
 #	pyHTTPd
 #	$Id$
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
+from baseConfig import pConfig
+
 class alias:
-	configfile = ""
-	aliases = {}
-	
-	def __init__(self, configfile="config/aliases"):
-		self.configfile = configfile
-		
-		fd = open(self.configfile)
-		
-		for line in fd:
-			if line.strip() != "" and not line.strip().startswith("#"):
-				key, val = line.strip().split()
-				self.aliases[key] = val
-				
-		fd.close()
+	def __init__(self):
+		self.aliases = {}
+		for alias in pConfig.getNodes("aliases.alias"):
+			key = alias.getElementsByTagName("path")[0].firstChild.nodeValue.strip()
+			val = alias.getElementsByTagName("target")[0].firstChild.nodeValue.strip()
+			self.aliases[key] = val
 	
 	def before_GET(self, httpd):
 		for (key, val) in self.aliases.items():

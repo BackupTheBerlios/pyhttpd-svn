@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ##################################################################
 #	pyHTTPd
 #	$Id$
@@ -40,20 +42,20 @@ class cgihandler:
 			env["PHP_SELF"]	= httpd.path
 		elif handleType == "Python":
 			handler			= "/usr/bin/python"
-			args.append(pConfig.getAttr("docroot")+httpd.path)
+			args.append(pConfig.getValue("base.docroot")+httpd.path)
 		
 		args.insert(0,handler.split("/")[-1])
 		
-		env["SERVER_SOFTWARE"]	= pConfig.getAttr("software")
+		env["SERVER_SOFTWARE"]	= pConfig.getValue("base.software")
 		env["SERVER_NAME"]		= "localhost"
 		env["GATEWAY_INTERFACE"]= "CGI/1.1"
 		
 		env["SERVER_PROTOCOL"]	= "HTTP/1.1"
-		env["SERVER_PORT"]		= pConfig.getAttr("port")
+		env["SERVER_PORT"]		= pConfig.getValue("base.port")
 		env["REQUEST_METHOD"]	= httpd.command
 		
 		env["PATH_INFO"]		= os.path.dirname(httpd.path)
-		env["PATH_TRANSLATED"]	= os.path.dirname(pConfig.getAttr("docroot")+httpd.path)
+		env["PATH_TRANSLATED"]	= os.path.dirname(pConfig.getValue("base.docroot")+httpd.path)
 		env["QUERY_STRING"]		= httpd.query
 		
 		env["REMOTE_ADDR"]		= "127.0.0.1"
@@ -76,9 +78,9 @@ class cgihandler:
 		
 		env["SCRIPT_NAME"]		= httpd.path
 		env["REQUEST_URI"]		= httpd.path
-		env["DOCUMENT_ROOT"]	= pConfig.getAttr("docroot")
-		env["SERVER_ADMIN"]		= pConfig.getAttr("admin")
-		env["SCRIPT_FILENAME"]	= pConfig.getAttr("docroot")+httpd.path
+		env["DOCUMENT_ROOT"]	= pConfig.getValue("base.docroot")
+		env["SERVER_ADMIN"]		= pConfig.getValue("base.admin")
+		env["SCRIPT_FILENAME"]	= pConfig.getValue("base.docroot")+httpd.path
 		
 		# collect the headers additionally sent by the user
 		for key in httpd.headers.keys():

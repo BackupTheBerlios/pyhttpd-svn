@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ##################################################################
 #	pyHTTPd
 #	$Id$
@@ -5,18 +7,14 @@
 ##################################################################
 
 import os
-from baseHTTPServer import BaseHTTPRequestHandler
 from mimetypes import MimeTypes
 
+from baseHTTPServer import BaseHTTPRequestHandler
 from baseConfig import pConfig
-import baseHeaders
 import baseRoutines
 
 class pHTTPRequestHandler(BaseHTTPRequestHandler):
-	#cookies = {}
-	#postdata = ""
-
-	# Make rfile unbuffered -- we need to read one line and then pass
+	# make rfile unbuffered.. we need to read one line and then pass
 	# the rest to a subprocess, so we can't use buffered input.
 	rbufsize = 0
 	
@@ -30,23 +28,21 @@ class pHTTPRequestHandler(BaseHTTPRequestHandler):
 		self.handleCommand()
 	
 	def do_POST(self):
-#		baseHeaders.parsePOSTData(self)
 		self.handleCommand()
 
 	def handleCommand(self):
 		self.handleFileFlag = True
 		
 		baseRoutines.parsePaths(self)
-		#baseHeaders.parseHeaders(self)
 		
 		# trigger the "before" hook
 		self.modules.hook(self, "before_"+self.command)
 
 		if not os.path.isfile(self.path):
-			if os.path.isfile(pConfig.getAttr("docroot")+self.path):
-				self.path = pConfig.getAttr("docroot")+self.path
-			elif os.path.isfile(pConfig.getAttr("docroot")+"/"+self.path):
-				self.path = pConfig.getAttr("docroot")+"/"+self.path
+			if os.path.isfile(pConfig.getValue("base.docroot")+self.path):
+				self.path = pConfig.getValue("base.docroot")+self.path
+			elif os.path.isfile(pConfig.getValue("base.docroot")+"/"+self.path):
+				self.path = pConfig.getValue("base.docroot")+"/"+self.path
 			else:
 				self.send_response(400)
 				self.end_headers()

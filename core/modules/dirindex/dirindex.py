@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 ##################################################################
 #	pyHTTPd
 #	$Id$
@@ -8,23 +10,15 @@ import os
 from baseConfig import pConfig
 
 class dirindex:
-	configfile = ""
-	indexes = []
-	
-	def __init__(self, configfile="config/dirindex"):
-		self.configfile = configfile
-		
-		fd = open(self.configfile)
-		
-		for line in fd:
-			if line.strip() != "" and not line.strip().startswith("#"):
-				self.indexes.append(line.strip())
-		
-		fd.close()
+	def __init__(self):
+		# read the directory indexes from the config file
+		self.indexes = []
+		for index in pConfig.getNodes("dirindex.index"):
+			self.indexes.append(index.firstChild.nodeValue.strip())
 
 	def before_GET(self, httpd):
 		if httpd.path.endswith("/"):
-			httpd.path += self.findIndexFile(pConfig.getAttr("docroot")+httpd.path);
+			httpd.path += self.findIndexFile(pConfig.getValue("base.docroot")+httpd.path);
 	
 	def findIndexFile(self, directory):
 		files = os.listdir(directory)
