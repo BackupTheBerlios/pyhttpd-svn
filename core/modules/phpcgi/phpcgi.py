@@ -18,15 +18,32 @@ class phpcgi:
 		self.processFile(httpd)
 		
 	def processFile(self, httpd):
+		handled = False
 		if httpd.path.endswith(".php"):
-			self.parseFile(httpd)
-			
+			self.parseFile(httpd, "PHP")
+			handled = True
+		elif httpd.path.endswith(".py"):
+			self.parseFile(httpd, "Python")
+			handled = True
+		
+		if handled:
 			# the main routine shouldn't process the file anymore
 			httpd.handleFileFlag = False
 			return False
 	
-	def parseFile(self, httpd):
+	def parseFile(self, httpd, handleType):
+		args = []
 		env = {}
+		
+		if handleType == "PHP":
+			handler			= "/usr/bin/php-cgi"
+			env["PHP_SELF"]	= httpd.path
+		elif handleType == "Python":
+			handler			= "/usr/bin/python"
+			args.append(pConfig.getAttr("docroot")+httpd.path)
+		
+		args.insert(0,handler.split("/")[-1])
+		
 		env["SERVER_SOFTWARE"]	= pConfig.getAttr("software")
 		env["SERVER_NAME"]		= "localhost"
 		env["GATEWAY_INTERFACE"]= "CGI/1.1"
@@ -59,7 +76,6 @@ class phpcgi:
 		
 		env["SCRIPT_NAME"]		= httpd.path
 		env["REQUEST_URI"]		= httpd.path
-		env["PHP_SELF"]			= httpd.path
 		env["DOCUMENT_ROOT"]	= pConfig.getAttr("docroot")
 		env["SERVER_ADMIN"]		= pConfig.getAttr("admin")
 		env["SCRIPT_FILENAME"]	= pConfig.getAttr("docroot")+httpd.path
@@ -88,10 +104,6 @@ class phpcgi:
 			pid, sts = os.waitpid(pid, 0)
 		else:
 			# child process
-			#os.dup2(httpd.rfile.fileno(), 0)
-			#os.dup2(httpd.wfile.fileno(), 1)
-			#os.execve("/usr/bin/php-cgi", ["php-cgi"], os.environ)
-			
 			# if there is client data then pipe it
 			if length:
 				os.dup2(httpd.rfile.fileno(), 0)
@@ -100,7 +112,7 @@ class phpcgi:
 			os.close(r)
 			w = os.fdopen(w, "w")
 			os.dup2(w.fileno(), 1)
-			os.execve("/usr/bin/php-cgi", ["php-cgi"], os.environ)
+			os.execve(handler, args, os.environ)
 		
 		# if there is client data then throw away additional data
 		if length:
