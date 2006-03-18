@@ -6,14 +6,14 @@
 
 import webadmin_login,webadmin_xhtml
 
-WEBADMIN_ROOT = "/webadmin/"
-COOKIE = "PyWebAdminUUID"
+WEBADMIN_ROOT	= "/webadmin/"
+COOKIE			= "pyHTTPdWebAdminUUID"
 
 class webadmin:
 	sessions = {}
 	
 	def __init__(self):
-		self.sessions["bla"] = "hihi"
+		return
 	
 	def before_GET(self, httpd):
 		if httpd.path.startswith(WEBADMIN_ROOT):

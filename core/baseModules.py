@@ -6,8 +6,6 @@
 
 import os,sys,inspect
 
-sys.path = [os.getcwd()+"/modules/"]+sys.path
-
 class pModules:
 	configfile = ""
 	directory = ""
@@ -28,6 +26,8 @@ class pModules:
 		# import the modules the user wants
 		# and instantiate the classes
 		for mod in mods:
+			# set the necessary paths to import our modules
+			sys.path = [os.getcwd()+"/modules/"+mod+"/"]+sys.path
 			self.modules.append(__import__(mod).__dict__[mod]())
 	
 	def hook(self, httpd, name):
