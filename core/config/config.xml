@@ -1,8 +1,35 @@
+<!--
+##################################################################
+#	pyHTTPd
+#	$Id$
+#	(c) 2006 by Tim Taubert
+##################################################################
+-->
+
 <?xml version="1.0" encoding="utf-8"?>
 <config>
-	<software>pyHTTPd/0.0.1-alpha</software>
-	<host>localhost</host>
-	<port>8888</port>
-	<docroot>/home/tim/wwwtest</docroot>
-	<admin>admin@server.com</admin>
+	<base>
+		<software>pyHTTPd/0.0.1</software>
+		<host>localhost</host>
+		<port>8888</port>
+		<docroot>/home/tim/wwwtest</docroot>
+		<admin>admin@server.com</admin>
+		<modules>
+			<module>alias</module>
+			<module>cgihandler</module>
+			<module>dirindex</module>
+			<module>webadmin</module>
+		</modules>
+	</base>
+	<aliases>
+		<alias>
+			<path>/alias/</path>
+			<target>/mnt/crypted/www/</target>
+		</alias>
+	</aliases>
+	<dirindex>
+		<index>index.htm</index>
+		<index>index.html</index>
+		<index>index.php</index>
+	</dirindex>
 </config>
