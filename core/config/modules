@@ -3,7 +3,7 @@
 alias
 dirindex
 webadmin
-phpcgi
+cgihandler
 
 #htaccess
 #php
