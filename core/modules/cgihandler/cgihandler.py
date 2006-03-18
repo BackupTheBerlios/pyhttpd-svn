@@ -7,7 +7,7 @@
 import os,select,socket,sys
 from baseConfig import pConfig
 
-class phpcgi:
+class cgihandler:
 	def __init__(self):
 		return
 	
