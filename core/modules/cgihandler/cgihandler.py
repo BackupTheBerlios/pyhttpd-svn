@@ -4,7 +4,7 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-import os,select,socket,sys
+import os,select
 from baseConfig import pConfig
 
 class cgihandler:
