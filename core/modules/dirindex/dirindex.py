@@ -12,9 +12,7 @@ from baseConfig import pConfig
 class dirindex:
 	def __init__(self):
 		# read the directory indexes from the config file
-		self.indexes = []
-		for index in pConfig.getNodes("dirindex.index"):
-			self.indexes.append(index.firstChild.nodeValue.strip())
+		self.indexes = pConfig.getValues(pConfig.getNodes("dirindex.index"))
 
 	def before_GET(self, httpd):
 		if httpd.path.endswith("/"):

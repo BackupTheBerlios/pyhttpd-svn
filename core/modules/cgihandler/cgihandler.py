@@ -20,32 +20,27 @@ class cgihandler:
 		self.processFile(httpd)
 		
 	def processFile(self, httpd):
-		handled = False
-		if httpd.path.endswith(".php"):
-			self.parseFile(httpd, "PHP")
-			handled = True
-		elif httpd.path.endswith(".py"):
-			self.parseFile(httpd, "Python")
-			handled = True
+		ext = httpd.path.split(".")[-1]
+		handler = self.findCGIHandler(httpd, ext)
 		
-		if handled:
+		if handler:
+			self.parseFile(httpd, handler)
+			
 			# the main routine shouldn't process the file anymore
 			httpd.handleFileFlag = False
 			return False
+		
+	def findCGIHandler(self, httpd, ext):
+		for handler in pConfig.getNodes("cgihandler.handler"):
+			for ext in pConfig.getValues(pConfig.getNodes("ext", handler)):
+				if httpd.path.endswith(ext):
+					# return path to the interpreter
+					return pConfig.getValue("int" ,handler)
+		# no handler was found
+		return None
 	
-	def parseFile(self, httpd, handleType):
-		args = []
+	def parseFile(self, httpd, handler):
 		env = {}
-		
-		if handleType == "PHP":
-			handler			= "/usr/bin/php-cgi"
-			env["PHP_SELF"]	= httpd.path
-		elif handleType == "Python":
-			handler			= "/usr/bin/python"
-			args.append(pConfig.getValue("base.docroot")+httpd.path)
-		
-		args.insert(0,handler.split("/")[-1])
-		
 		env["SERVER_SOFTWARE"]	= pConfig.getValue("base.software")
 		env["SERVER_NAME"]		= "localhost"
 		env["GATEWAY_INTERFACE"]= "CGI/1.1"
@@ -114,7 +109,7 @@ class cgihandler:
 			os.close(r)
 			w = os.fdopen(w, "w")
 			os.dup2(w.fileno(), 1)
-			os.execve(handler, args, os.environ)
+			os.execve(handler, [handler, pConfig.getValue("base.docroot")+httpd.path], os.environ)
 		
 		# if there is client data then throw away additional data
 		if length:

@@ -12,8 +12,7 @@ class alias:
 	def __init__(self):
 		self.aliases = {}
 		for alias in pConfig.getNodes("aliases.alias"):
-			key = alias.getElementsByTagName("path")[0].firstChild.nodeValue.strip()
-			val = alias.getElementsByTagName("target")[0].firstChild.nodeValue.strip()
+			key, val = [pConfig.getValue("source", alias), pConfig.getValue("target", alias)]
 			self.aliases[key] = val
 	
 	def before_GET(self, httpd):

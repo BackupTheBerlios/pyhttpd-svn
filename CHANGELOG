@@ -3,8 +3,13 @@ pyHTTPd CHANGELOG
 
 pyHTTPd 0.0.2
 -----------------------------------
+	? on Linux make it a forking HTTP server
+	? completely independent from python library modules (BasicHTTPServer/SocketServer)
+	+ pyhttpd is now a threading HTTP server
 	+ configuration interface re-designed (xml)
 	+ module configuration has now a handler
+	+ module php-cgi is now cgihandler and should be able to cope with every cgi script
+	? htaccess module implemented in first version
 
 pyHTTPd 0.0.1 (16.03.2006)
 -----------------------------------

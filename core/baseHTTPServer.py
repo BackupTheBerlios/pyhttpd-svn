@@ -14,7 +14,7 @@ import sys
 import time
 import socket # For gethostbyaddr()
 import mimetools
-import SocketServer
+import baseSocketServer
 
 # Default error message
 DEFAULT_ERROR_MESSAGE = """\
@@ -32,19 +32,19 @@ DEFAULT_ERROR_MESSAGE = """\
 def _quote_html(html):
     return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-class HTTPServer(SocketServer.TCPServer):
+class HTTPServer(baseSocketServer.ThreadingTCPServer):
 
     allow_reuse_address = 1    # Seems to make sense in testing environment
 
     def server_bind(self):
         """Override server_bind to store the server name."""
-        SocketServer.TCPServer.server_bind(self)
+        baseSocketServer.ThreadingTCPServer.server_bind(self)
         host, port = self.socket.getsockname()[:2]
         self.server_name = socket.getfqdn(host)
         self.server_port = port
 
 
-class BaseHTTPRequestHandler(SocketServer.StreamRequestHandler):
+class BaseHTTPRequestHandler(baseSocketServer.StreamRequestHandler):
 
     """HTTP request handler base class.
 

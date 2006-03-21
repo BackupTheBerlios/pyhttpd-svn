@@ -14,16 +14,15 @@
 		<docroot>/home/tim/wwwtest</docroot>
 		<servroot>/mnt/crypted/python/pyhttpd</servroot>
 		<admin>admin@server.com</admin>
-		<modules>
-			<module>alias</module>
-			<module>cgihandler</module>
-			<module>dirindex</module>
-			<module>webadmin</module>
-		</modules>
+		<module>htaccess</module>
+		<module>alias</module>
+		<module>dirindex</module>
+		<module>cgihandler</module>
+		<!-- <module>webadmin</module> -->
 	</base>
 	<aliases>
 		<alias>
-			<path>/alias/</path>
+			<source>/alias/</source>
 			<target>/mnt/crypted/www/</target>
 		</alias>
 	</aliases>
@@ -32,4 +31,16 @@
 		<index>index.html</index>
 		<index>index.php</index>
 	</dirindex>
+	<cgihandler>
+		<handler>
+			<int>/usr/bin/php-cgi</int>
+			<ext>.php</ext>
+			<ext>.php3</ext>
+			<ext>.phtml</ext>
+		</handler>
+		<handler>
+			<int>/usr/bin/python</int>
+			<ext>.py</ext>
+		</handler>
+	</cgihandler>
 </config>

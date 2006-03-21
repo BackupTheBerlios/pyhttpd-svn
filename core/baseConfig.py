@@ -13,24 +13,13 @@ class pConfig:
 	def loadConfiguration(self):
 		self.xmldoc = minidom.parse("config/config.xml")
 		self.xmldoc = self.xmldoc.getElementsByTagName("config")[0]
-		
-		self.filterNodes(self.xmldoc)
-		
-		#print self.getNodes("base.modules.module")[0].firstChild.nodeValue
 	loadConfiguration = classmethod(loadConfiguration)
 	
-	def filterNodes(self, nodes):
-		for node in nodes.childNodes:
-			if node.nodeType != 1:
-				nodes.removeChild(node)
-			else:
-				self.filterNodes(node)
-	filterNodes = classmethod(filterNodes)
-	
-	def getValue(self, path):
-		paths = path.split(".")
-		node = self.xmldoc
-		for p in paths:
+	def getValue(self, path, node=None):
+		if not node:
+			node = self.xmldoc
+		
+		for p in path.split("."):
 			node = node.getElementsByTagName(p)
 			if not node:
 				raise AttributeError, p
@@ -38,10 +27,33 @@ class pConfig:
 			node = node[0]
 		return node.firstChild.nodeValue
 	getValue = classmethod(getValue)
+	
+	def getValues(self, nodes):
+		values = []
+		for child in nodes:
+			values.append(child.firstChild.nodeValue)
+		
+		return values
+	getValues = classmethod(getValues)
+	
+	def getNode(self, path, node=None):
+		if not node:
+			node = self.xmldoc
+		
+		for p in path.split("."):
+			node = node.getElementsByTagName(p)
+			if not node:
+				raise AttributeError, p
+				break
+			node = node[0]
+		return node
+	getNode = classmethod(getNode)
 
-	def getNodes(self, path):
+	def getNodes(self, path, node=None):
+		if not node:
+			node = self.xmldoc
+			
 		paths = path.split(".")
-		node = self.xmldoc
 		for p in paths[:-1]:
 			node = node.getElementsByTagName(p)
 			if not node:

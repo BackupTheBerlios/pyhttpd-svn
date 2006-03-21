@@ -13,8 +13,8 @@ class pModules:
 	def __init__(self):
 		# load the module names from the config file
 		mods = []
-		for mod in pConfig.getNodes("base.modules.module"):
-			mods.append(mod.firstChild.nodeValue.strip())
+		for mod in pConfig.getValues(pConfig.getNodes("base.module")):
+			mods.append(mod.strip())
 		
 		# import the modules the user wants
 		# and instantiate the classes
