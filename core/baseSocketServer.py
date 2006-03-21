@@ -436,7 +436,6 @@ class ThreadingMixIn:
             t.setDaemon (1)
         t.start()
 
-class ThreadingUDPServer(ThreadingMixIn, UDPServer): pass
 class ThreadingTCPServer(ThreadingMixIn, TCPServer): pass
 
 class BaseRequestHandler:
