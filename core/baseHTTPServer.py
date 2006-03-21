@@ -32,7 +32,7 @@ DEFAULT_ERROR_MESSAGE = """\
 def _quote_html(html):
     return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-class HTTPServer(baseSocketServer.ThreadingTCPServer):
+'''class HTTPServer(baseSocketServer.ThreadingTCPServer):
 
     allow_reuse_address = 1    # Seems to make sense in testing environment
 
@@ -41,112 +41,10 @@ class HTTPServer(baseSocketServer.ThreadingTCPServer):
         baseSocketServer.ThreadingTCPServer.server_bind(self)
         host, port = self.socket.getsockname()[:2]
         self.server_name = socket.getfqdn(host)
-        self.server_port = port
+        self.server_port = port'''
 
 
 class BaseHTTPRequestHandler(baseSocketServer.StreamRequestHandler):
-
-    """HTTP request handler base class.
-
-    The following explanation of HTTP serves to guide you through the
-    code as well as to expose any misunderstandings I may have about
-    HTTP (so you don't need to read the code to figure out I'm wrong
-    :-).
-
-    HTTP (HyperText Transfer Protocol) is an extensible protocol on
-    top of a reliable stream transport (e.g. TCP/IP).  The protocol
-    recognizes three parts to a request:
-
-    1. One line identifying the request type and path
-    2. An optional set of RFC-822-style headers
-    3. An optional data part
-
-    The headers and data are separated by a blank line.
-
-    The first line of the request has the form
-
-    <command> <path> <version>
-
-    where <command> is a (case-sensitive) keyword such as GET or POST,
-    <path> is a string containing path information for the request,
-    and <version> should be the string "HTTP/1.0" or "HTTP/1.1".
-    <path> is encoded using the URL encoding scheme (using %xx to signify
-    the ASCII character with hex code xx).
-
-    The specification specifies that lines are separated by CRLF but
-    for compatibility with the widest range of clients recommends
-    servers also handle LF.  Similarly, whitespace in the request line
-    is treated sensibly (allowing multiple spaces between components
-    and allowing trailing whitespace).
-
-    Similarly, for output, lines ought to be separated by CRLF pairs
-    but most clients grok LF characters just fine.
-
-    If the first line of the request has the form
-
-    <command> <path>
-
-    (i.e. <version> is left out) then this is assumed to be an HTTP
-    0.9 request; this form has no optional headers and data part and
-    the reply consists of just the data.
-
-    The reply form of the HTTP 1.x protocol again has three parts:
-
-    1. One line giving the response code
-    2. An optional set of RFC-822-style headers
-    3. The data
-
-    Again, the headers and data are separated by a blank line.
-
-    The response code line has the form
-
-    <version> <responsecode> <responsestring>
-
-    where <version> is the protocol version ("HTTP/1.0" or "HTTP/1.1"),
-    <responsecode> is a 3-digit response code indicating success or
-    failure of the request, and <responsestring> is an optional
-    human-readable string explaining what the response code means.
-
-    This server parses the request and the headers, and then calls a
-    function specific to the request type (<command>).  Specifically,
-    a request SPAM will be handled by a method do_SPAM().  If no
-    such method exists the server sends an error response to the
-    client.  If it exists, it is called with no arguments:
-
-    do_SPAM()
-
-    Note that the request name is case sensitive (i.e. SPAM and spam
-    are different requests).
-
-    The various request details are stored in instance variables:
-
-    - client_address is the client IP address in the form (host,
-    port);
-
-    - command, path and version are the broken-down request line;
-
-    - headers is an instance of mimetools.Message (or a derived
-    class) containing the header information;
-
-    - rfile is a file object open for reading positioned at the
-    start of the optional input data part;
-
-    - wfile is a file object open for writing.
-
-    IT IS IMPORTANT TO ADHERE TO THE PROTOCOL FOR WRITING!
-
-    The first thing to be written must be the response line.  Then
-    follow 0 or more header lines, then a blank line, and then the
-    actual data (if any).  The meaning of the header lines depends on
-    the command executed by the server; in most cases, when data is
-    returned, there should be at least one header line of the form
-
-    Content-type: <type>/<subtype>
-
-    where <type> and <subtype> should be registered MIME types,
-    e.g. "text/html" or "text/plain".
-
-    """
 
     # The Python system version, truncated to its first component.
     sys_version = "Python/" + sys.version.split()[0]
@@ -488,30 +386,3 @@ class BaseHTTPRequestHandler(baseSocketServer.StreamRequestHandler):
               'The gateway server did not receive a timely response'),
         505: ('HTTP Version not supported', 'Cannot fulfill request.'),
         }
-
-
-def test(HandlerClass = BaseHTTPRequestHandler,
-         ServerClass = HTTPServer, protocol="HTTP/1.0"):
-    """Test the HTTP request handler class.
-
-    This runs an HTTP server on port 8000 (or the first command line
-    argument).
-
-    """
-
-    if sys.argv[1:]:
-        port = int(sys.argv[1])
-    else:
-        port = 8000
-    server_address = ('', port)
-
-    HandlerClass.protocol_version = protocol
-    httpd = ServerClass(server_address, HandlerClass)
-
-    sa = httpd.socket.getsockname()
-    print "Serving HTTP on", sa[0], "port", sa[1], "..."
-    httpd.serve_forever()
-
-
-if __name__ == '__main__':
-    test()

@@ -7,7 +7,7 @@
 ##################################################################
 
 from baseConfig import pConfig
-from baseHTTPServer import HTTPServer
+from baseSocketServer import BaseServer
 from baseRequestHandler import pHTTPRequestHandler
 from baseModules import pModules
 
@@ -16,7 +16,7 @@ if __name__ == "__main__":
 	pConfig.loadConfiguration()
 	
 	# start main server thread
-	httpd = HTTPServer(('',int(pConfig.getValue("base.port"))), pHTTPRequestHandler)
+	httpd = BaseServer(('',int(pConfig.getValue("base.port"))), pHTTPRequestHandler)
 	
 	# load modules
 	pHTTPRequestHandler.modules = pModules()

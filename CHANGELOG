@@ -3,8 +3,7 @@ pyHTTPd CHANGELOG
 
 pyHTTPd 0.0.2
 -----------------------------------
-	? on Linux make it a forking HTTP server
-	? completely independent from python library modules (BasicHTTPServer/SocketServer)
+	+ merged BaseServer/TCPServer/BaseHTTPServer to one class - should bring performance and makes independent from these standard library modules
 	+ pyhttpd is now a threading HTTP server
 	+ configuration interface re-designed (xml)
 	+ module configuration has now a handler
