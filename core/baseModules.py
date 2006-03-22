@@ -15,32 +15,41 @@ class pModules:
 	modInstances = []
 	
 	def __init__(self):
-		self.loadModuleNames()
-		self.instantiateModules()
+		self.__loadModuleNames()
+		self.__instantiateModules()
 		
-	def loadModuleNames(self):
-		# load the module names from the config file
+	def __loadModuleNames(self):
+		"""
+		Loads the module names from the config file.
+		"""
 		for mod in pConfig.getValues(pConfig.getNodes("base.module")):
 			self.modNames.append(mod.strip())
 		
-	def instantiateModules(self):
-		# import the modules the user wants
-		# and instantiate the classes
+	def __instantiateModules(self):
+		"""
+		Imports the modules the user wants and instantiates the module classes.
+		"""
 		for mod in self.modNames:
 			# set the necessary paths to import our modules
 			sys.path = [os.getcwd()+"/modules/"+mod+"/"]+sys.path
 			self.modInstances.append(__import__(mod).__dict__[mod]())
 	
-	# trigger routines before an event
 	def triggerBefore(self, httpd, name):
+	"""
+	Calls the modules' routines before an event is triggered
+	"""
 		self.__hook(httpd, "before_"+name)
 	
-	# trigger routines after an event
 	def triggerAfter(self, httpd, name):
+	"""
+	Calls the modules' routines after an event is triggered
+	"""
 		self.__hook(httpd, "after_"+name)
 	
-	# calls the routines assigned to the given hook
 	def __hook(self, httpd, name):
+	"""
+	Calls the routines assigned to the given hook.
+	"""
 		for mod in self.modInstances:
 			if hasattr(mod, name) and getattr(mod, name)(httpd) == False:
 				return

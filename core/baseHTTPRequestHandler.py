@@ -12,17 +12,7 @@ from	mimetypes	import MimeTypes
 from	baseConfig	import pConfig
 import	baseRoutines
 
-DEFAULT_ERROR_MESSAGE = """\
-<head>
-<title>Error response</title>
-</head>
-<body>
-<h1>Error response</h1>
-<p>Error code %(code)d.
-<p>Message: %(message)s.
-<p>Error code explanation: %(code)s = %(explain)s.
-</body>
-"""
+DEFAULT_ERROR_MESSAGE =	"<head><title>Error response</title></head><body><h1>Error response</h1><p>Error code %(code)d.</p><p>Message: %(message)s.</p><p>Error code explanation: %(code)s = %(explain)s.</body>"
 
 def _quote_html(html):
 	return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
