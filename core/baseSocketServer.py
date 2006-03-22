@@ -2,13 +2,13 @@
 
 ##################################################################
 #	pyHTTPd
-#	$Id: baseHeaders.py 26 2006-03-18 15:30:40Z twenty-three $
+#	$Id$
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-import socket,sys,os,threading
+import socket, sys, os, threading
 
-class BaseServer:
+class HTTPServer:
 
     address_family = socket.AF_INET
     socket_type = socket.SOCK_STREAM
@@ -93,50 +93,3 @@ class BaseServer:
         import traceback
         traceback.print_exc() # XXX But this goes to stderr!
         print '-'*40
-
-class BaseRequestHandler:
-
-    def __init__(self, request, client_address, server):
-        self.request = request
-        self.client_address = client_address
-        self.server = server
-        try:
-            self.setup()
-            self.handle()
-            self.finish()
-        finally:
-            sys.exc_traceback = None    # Help garbage collection
-
-    def setup(self):
-        pass
-
-    def handle(self):
-        pass
-
-    def finish(self):
-        pass
-
-class StreamRequestHandler(BaseRequestHandler):
-
-    """Define self.rfile and self.wfile for stream sockets."""
-
-    # Default buffer sizes for rfile, wfile.
-    # We default rfile to buffered because otherwise it could be
-    # really slow for large data (a getc() call per byte); we make
-    # wfile unbuffered because (a) often after a write() we want to
-    # read and we need to flush the line; (b) big writes to unbuffered
-    # files are typically optimized by stdio even when big reads
-    # aren't.
-    rbufsize = -1
-    wbufsize = 0
-
-    def setup(self):
-        self.connection = self.request
-        self.rfile = self.connection.makefile('rb', self.rbufsize)
-        self.wfile = self.connection.makefile('wb', self.wbufsize)
-
-    def finish(self):
-        if not self.wfile.closed:
-            self.wfile.flush()
-        self.wfile.close()
-        self.rfile.close()
