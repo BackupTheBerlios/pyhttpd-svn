@@ -6,12 +6,8 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-# server
-import sys,time,socket,mimetools
-import baseSocketServer
-
-# request handler
 import os
+
 from mimetypes import MimeTypes
 from baseConfig import pConfig
 import baseRoutines
@@ -31,7 +27,7 @@ DEFAULT_ERROR_MESSAGE = """\
 def _quote_html(html):
 	return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-class BaseHTTPRequestHandler:
+class pHTTPRequestHandler:
 	
 	# defaults
 	#rbufsize = -1

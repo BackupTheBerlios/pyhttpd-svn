@@ -7,8 +7,8 @@
 ##################################################################
 
 from baseConfig import pConfig
-from baseSocketServer import BaseServer
-from baseHTTPServer import BaseHTTPRequestHandler
+from baseHTTPServer import pHTTPServer
+from baseHTTPRequestHandler import pHTTPRequestHandler
 from baseModules import pModules
 
 if __name__ == "__main__":
@@ -16,10 +16,10 @@ if __name__ == "__main__":
 	pConfig.loadConfiguration()
 	
 	# start main server thread
-	httpd = BaseServer(('',int(pConfig.getValue("base.port"))), BaseHTTPRequestHandler)
+	httpd = pHTTPServer(('',int(pConfig.getValue("base.port"))), pHTTPRequestHandler)
 	
 	# load modules
-	BaseHTTPRequestHandler.modules = pModules()
+	pHTTPRequestHandler.modules = pModules()
 	
 	# let the server serve
 	httpd.serve_forever()
