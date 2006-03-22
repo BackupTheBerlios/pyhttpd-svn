@@ -4,9 +4,7 @@ pyHTTPd CHANGELOG
 pyHTTPd 0.0.2
 -----------------------------------
 	? htaccess module implemented in first version
-	? rename these new files
-	? re-format the classes in tabs
-	? merged HTTPRequestHandler/BaseRequestHandler to one class - should bring performance and makes independent from these standard library modules
+	+ merged HTTPRequestHandler/BaseRequestHandler to one class - should bring performance and makes independent from these standard library modules
 	+ merged BaseServer/TCPServer/BaseHTTPServer to one class - [...]
 	+ pyhttpd is now a threading HTTP server
 	+ configuration interface re-designed (xml)

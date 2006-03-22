@@ -6,11 +6,11 @@
 #	(c) 2006 by Tim Taubert
 ##################################################################
 
-import os
+import	os, sys, socket, time, mimetools
+from	mimetypes	import MimeTypes
 
-from mimetypes import MimeTypes
-from baseConfig import pConfig
-import baseRoutines
+from	baseConfig	import pConfig
+import	baseRoutines
 
 DEFAULT_ERROR_MESSAGE = """\
 <head>
@@ -29,15 +29,71 @@ def _quote_html(html):
 
 class pHTTPRequestHandler:
 	
-	# defaults
-	#rbufsize = -1
+	rbufsize = 0
 	wbufsize = 0
 
-	sys_version = "Python/" + sys.version.split()[0]
+	sys_version			= "Python/2.4"
+	server_version		= "BaseHTTP/"
+	protocol_version	= "HTTP/1.0"
 	
-	server_version = "BaseHTTP/"
+	# message-like class used to parse headers
+	MessageClass = mimetools.Message
 	
-	rbufsize = 0
+	# needed for timestamp formatting
+	weekdayname	= ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+	monthname	= [None,
+					'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+					'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+	
+	# standard conform http response codes
+	responses = {
+		100: ('Continue', 'Request received, please continue'),
+		101: ('Switching Protocols', 'Switching to new protocol; obey Upgrade header'),
+		
+		200: ('OK', 'Request fulfilled, document follows'),
+		201: ('Created', 'Document created, URL follows'),
+		202: ('Accepted', 'Request accepted, processing continues off-line'),
+		203: ('Non-Authoritative Information', 'Request fulfilled from cache'),
+		204: ('No response', 'Request fulfilled, nothing follows'),
+		205: ('Reset Content', 'Clear input form for further input.'),
+		206: ('Partial Content', 'Partial content follows.'),
+		
+		300: ('Multiple Choices', 'Object has several resources -- see URI list'),
+		301: ('Moved Permanently', 'Object moved permanently -- see URI list'),
+		302: ('Found', 'Object moved temporarily -- see URI list'),
+		303: ('See Other', 'Object moved -- see Method and URL list'),
+		304: ('Not modified', 'Document has not changed since given time'),
+		305: ('Use Proxy', 'You must use proxy specified in Location to access this resource.'),
+		307: ('Temporary Redirect', 'Object moved temporarily -- see URI list'),
+		
+		400: ('Bad request', 'Bad request syntax or unsupported method'),
+		401: ('Unauthorized', 'No permission -- see authorization schemes'),
+		402: ('Payment required', 'No payment -- see charging schemes'),
+		403: ('Forbidden', 'Request forbidden -- authorization will not help'),
+		404: ('Not Found', 'Nothing matches the given URI'),
+		405: ('Method Not Allowed', 'Specified method is invalid for this server.'),
+		406: ('Not Acceptable', 'URI not available in preferred format.'),
+		407: ('Proxy Authentication Required', 'You must authenticate with this proxy before proceeding.'),
+		408: ('Request Time-out', 'Request timed out; try again later.'),
+		409: ('Conflict', 'Request conflict.'),
+		410: ('Gone', 'URI no longer exists and has been permanently removed.'),
+		411: ('Length Required', 'Client must specify Content-Length.'),
+		412: ('Precondition Failed', 'Precondition in headers is false.'),
+		413: ('Request Entity Too Large', 'Entity is too large.'),
+		414: ('Request-URI Too Long', 'URI is too long.'),
+		415: ('Unsupported Media Type', 'Entity body in unsupported format.'),
+		416: ('Requested Range Not Satisfiable', 'Cannot satisfy request range.'),
+		417: ('Expectation Failed', 'Expect condition could not be satisfied.'),
+		
+		500: ('Internal error', 'Server got itself in trouble'),
+		501: ('Not Implemented', 'Server does not support this operation'),
+		502: ('Bad Gateway', 'Invalid responses from another server/proxy.'),
+		503: ('Service temporarily overloaded', 'The server cannot process the request due to a high load'),
+		504: ('Gateway timeout', 'The gateway server did not receive a timely response'),
+		505: ('HTTP Version not supported', 'Cannot fulfill request.'),
+	}
+	
+###################################################################################
 	
 	def __init__(self, request, client_address, server):
 		self.request = request
@@ -51,9 +107,9 @@ class pHTTPRequestHandler:
 			sys.exc_traceback = None    # Help garbage collection
 			
 	def setup(self):
-		self.connection = self.request
-		self.rfile = self.connection.makefile('rb', self.rbufsize)
-		self.wfile = self.connection.makefile('wb', self.wbufsize)
+		self.connection	= self.request
+		self.rfile		= self.connection.makefile('rb', self.rbufsize)
+		self.wfile		= self.connection.makefile('wb', self.wbufsize)
 	
 	def finish(self):
 		if not self.wfile.closed:
@@ -79,7 +135,7 @@ class pHTTPRequestHandler:
 		baseRoutines.parsePaths(self)
 		
 		# trigger the "before" hook
-		self.modules.hook(self, "before_"+self.command)
+		self.modules.triggerBefore(self, self.command)
 		
 		if not os.path.isfile(self.path):
 			if os.path.isfile(pConfig.getValue("base.docroot")+self.path):
@@ -87,7 +143,7 @@ class pHTTPRequestHandler:
 			elif os.path.isfile(pConfig.getValue("base.docroot")+"/"+self.path):
 				self.path = pConfig.getValue("base.docroot")+"/"+self.path
 			else:
-				self.send_response(400)
+				self.send_response(404)
 				self.end_headers()
 				self.handleFileFlag = False
 		
@@ -98,7 +154,7 @@ class pHTTPRequestHandler:
 				pass
 		
 		# trigger the "after" hook
-		self.modules.hook(self, "after_"+self.command)
+		self.modules.triggerAfter(self, self.command)
 
 	def handleFile(self, filename):
 		fd = open(filename)
@@ -181,11 +237,10 @@ class pHTTPRequestHandler:
 		if not self.parse_request(): # An error code has been sent, just exit
 			return
 		mname = 'do_' + self.command
-		if not hasattr(self, mname):
+		if hasattr(self, mname):
+			getattr(self, mname)()
+		else:
 			self.send_error(501, "Unsupported method (%r)" % self.command)
-			return
-		method = getattr(self, mname)
-		method()
 	
 	def handle(self):
 		self.close_connection = 1
@@ -241,29 +296,23 @@ class pHTTPRequestHandler:
 				self.close_connection = 0
 	
 	def end_headers(self):
-		"""Send the blank line ending the MIME headers."""
 		if self.request_version != 'HTTP/0.9':
 			self.wfile.write("\r\n")
 	
 	def log_request(self, code='-', size='-'):
-		self.log_message('"%s" %s %s',
-							self.requestline, str(code), str(size))
+		self.log_message('"%s" %s %s', self.requestline, str(code), str(size))
 	
 	def log_error(self, *args):
 		self.log_message(*args)
 	
 	def log_message(self, format, *args):
-		sys.stderr.write("%s - - [%s] %s\n" %
-							(self.address_string(),
-							self.log_date_time_string(),
-							format%args))
+		sys.stderr.write("%s - - [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format % args))
 	
 	def version_string(self):
-		"""Return the server software version string."""
 		return self.server_version + ' ' + self.sys_version
-
+	
+	# returns the current date and time formatted for a message header
 	def date_time_string(self):
-		"""Return the current date and time formatted for a message header."""
 		now = time.time()
 		year, month, day, hh, mm, ss, wd, y, z = time.gmtime(now)
 		s = "%s, %02d %3s %4d %02d:%02d:%02d GMT" % (
@@ -272,91 +321,15 @@ class pHTTPRequestHandler:
 				hh, mm, ss)
 		return s
 	
+	# returns the current time formatted for logging
 	def log_date_time_string(self):
-		"""Return the current time formatted for logging."""
 		now = time.time()
 		year, month, day, hh, mm, ss, x, y, z = time.localtime(now)
 		s = "%02d/%3s/%04d %02d:%02d:%02d" % (
-				day, self.monthname[month], year, hh, mm, ss)
+				day, self.monthname[month], year,
+				hh, mm, ss)
 		return s
 	
-	weekdayname = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-	
-	monthname = [None,
-					'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-					'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
 	def address_string(self):
 		host, port = self.client_address[:2]
 		return socket.getfqdn(host)
-	
-	protocol_version = "HTTP/1.0"
-	
-	# The Message-like class used to parse headers
-	MessageClass = mimetools.Message
-	
-	responses = {
-		100: ('Continue', 'Request received, please continue'),
-		101: ('Switching Protocols',
-				'Switching to new protocol; obey Upgrade header'),
-		
-		200: ('OK', 'Request fulfilled, document follows'),
-		201: ('Created', 'Document created, URL follows'),
-		202: ('Accepted',
-				'Request accepted, processing continues off-line'),
-		203: ('Non-Authoritative Information', 'Request fulfilled from cache'),
-		204: ('No response', 'Request fulfilled, nothing follows'),
-		205: ('Reset Content', 'Clear input form for further input.'),
-		206: ('Partial Content', 'Partial content follows.'),
-		
-		300: ('Multiple Choices',
-				'Object has several resources -- see URI list'),
-		301: ('Moved Permanently', 'Object moved permanently -- see URI list'),
-		302: ('Found', 'Object moved temporarily -- see URI list'),
-		303: ('See Other', 'Object moved -- see Method and URL list'),
-		304: ('Not modified',
-				'Document has not changed since given time'),
-		305: ('Use Proxy',
-				'You must use proxy specified in Location to access this '
-				'resource.'),
-		307: ('Temporary Redirect',
-				'Object moved temporarily -- see URI list'),
-		
-		400: ('Bad request',
-				'Bad request syntax or unsupported method'),
-		401: ('Unauthorized',
-				'No permission -- see authorization schemes'),
-		402: ('Payment required',
-				'No payment -- see charging schemes'),
-		403: ('Forbidden',
-				'Request forbidden -- authorization will not help'),
-		404: ('Not Found', 'Nothing matches the given URI'),
-		405: ('Method Not Allowed',
-				'Specified method is invalid for this server.'),
-		406: ('Not Acceptable', 'URI not available in preferred format.'),
-		407: ('Proxy Authentication Required', 'You must authenticate with '
-				'this proxy before proceeding.'),
-		408: ('Request Time-out', 'Request timed out; try again later.'),
-		409: ('Conflict', 'Request conflict.'),
-		410: ('Gone',
-				'URI no longer exists and has been permanently removed.'),
-		411: ('Length Required', 'Client must specify Content-Length.'),
-		412: ('Precondition Failed', 'Precondition in headers is false.'),
-		413: ('Request Entity Too Large', 'Entity is too large.'),
-		414: ('Request-URI Too Long', 'URI is too long.'),
-		415: ('Unsupported Media Type', 'Entity body in unsupported format.'),
-		416: ('Requested Range Not Satisfiable',
-				'Cannot satisfy request range.'),
-		417: ('Expectation Failed',
-				'Expect condition could not be satisfied.'),
-		
-		500: ('Internal error', 'Server got itself in trouble'),
-		501: ('Not Implemented',
-				'Server does not support this operation'),
-		502: ('Bad Gateway', 'Invalid responses from another server/proxy.'),
-		503: ('Service temporarily overloaded',
-				'The server cannot process the request due to a high load'),
-		504: ('Gateway timeout',
-				'The gateway server did not receive a timely response'),
-		505: ('HTTP Version not supported', 'Cannot fulfill request.'),
-		}

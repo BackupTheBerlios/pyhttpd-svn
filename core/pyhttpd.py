@@ -15,7 +15,7 @@ if __name__ == "__main__":
 	# load configuration data
 	pConfig.loadConfiguration()
 	
-	# start main server thread
+	# start http server
 	httpd = pHTTPServer(('',int(pConfig.getValue("base.port"))), pHTTPRequestHandler)
 	
 	# load modules
